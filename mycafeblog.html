@@ -1,0 +1,569 @@
+<!-- ⚠️ 請使用 UTF-8 編碼儲存 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Taipei Café Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Noto Sans', sans-serif;
+      background-color: #f4f0ea;
+      color: #333;
+    }
+
+    header {
+      background-color: #5e412f;
+      color: #fff;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      color: #ddd;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .card {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .img-wrapper {
+      width: 100%;
+      height: 220px;
+      background-color: #ddd;
+      overflow: hidden;
+    }
+
+    .img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      object-position: var(--position, center);
+    }
+
+    .card-content {
+      padding: 1rem;
+    }
+
+    .card-content h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.4rem;
+      color: #5e412f;
+    }
+
+    .info {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .description {
+      line-height: 1.6;
+    }
+
+    .map-link {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #0077cc;
+      text-decoration: none;
+    }
+
+    .map-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        flex-direction: row;
+        height: 220px;
+      }
+
+      .img-wrapper {
+        width: 300px;
+        height: 100%;
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      .card-content {
+        flex: 1;
+      }
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 1250px;
+      width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal h2 {
+      margin-top: 0;
+      color: #5e412f;
+    }
+
+    .modal img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .modal .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      color: #999;
+      cursor: pointer;
+    }
+
+    .modal .section-title {
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      font-size: 1rem;
+      color: #444;
+    }
+
+    @media (max-width: 600px) {
+      .modal {
+        padding: 1rem;
+      }
+    }
+
+    .main-nav {
+      background-color: #000;
+      padding: 1rem 0;
+      position: relative;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      color: white;
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .nav-toggle {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: white;
+      display: none;
+      cursor: pointer;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-list > li {
+      position: relative;
+    }
+
+    .nav-list a {
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+      padding: 0.5rem;
+    }
+
+    .nav-list a:hover {
+      color: #7be89e;
+    }
+
+    .dropdown {
+      display: none;
+      position: absolute;
+      top: 2.5rem;
+      left: 0;
+      background: #f4f4f4;
+      border-radius: 0.25rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      min-width: 180px;
+      z-index: 1000;
+      padding: 0.5rem 0;
+    }
+
+    .dropdown li a {
+      color: #222;
+      display: block;
+      padding: 0.75rem 1rem;
+    }
+
+    .dropdown li a:hover {
+      background-color: #eee;
+    }
+
+    .nav-list li:hover > .dropdown {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .nav-toggle {
+        display: block;
+      }
+
+      .nav-list {
+        flex-direction: column;
+        background-color: #000;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        display: none;
+      }
+
+      .nav-list.show {
+        display: flex;
+      }
+
+      .nav-list > li {
+        text-align: center;
+      }
+
+      .nav-list li:hover > .dropdown {
+        position: static;
+      }
+    }
+
+    .station-selector-container {
+      display: flex;
+      justify-content: center;
+      padding: 2rem 0;
+      background-color: #f9f9f9;
+    }
+
+    .station-selector {
+      display: flex;
+      align-items: center;
+      justify-content: center; /* 置中整列內容 */
+      gap: 1rem;
+      flex-wrap: wrap; /* 小螢幕自動換行 */
+      background-color: #ffffff;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .station-selector label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #333;
+      white-space: nowrap;
+    }
+
+    .station-selector select {
+      width: 200px;
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      appearance: none;
+    }
+
+    .station-selector button {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .station-selector button:hover {
+      background-color: #555;
+    }
+
+  </style>
+</head>
+<body>
+  <nav class="main-nav">
+    <div class="nav-container">
+      <div class="logo">☕ Taipei Café Guide</div>
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <ul class="nav-list">
+        <li><a href="#">About Me</a></li>
+        <li>
+          <a href="#">Other Areas</a>
+          <ul class="dropdown">
+            <li><a href="#">Taoyuan</a></li>
+            <li><a href="#">Changhua</a></li>
+            <li><a href="#">Taichung</a></li>
+            <li><a href="#">Japan</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Other Food</a>
+          <ul class="dropdown">
+            <li><a href="#">Ramen</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  
+  <header>
+    <h1>☕ Taipei Café Guide</h1>
+    <p>A curated list of cozy cafés across Taipei.</p>
+  </header>
+
+  <div class="station-selector-container">
+    <form class="station-selector">
+      <label for="station">Please select a station</label>
+      <select id="station" name="station">
+        <optgroup label="Red Line (Tamsui–Xinyi)">
+          <option value="Taipei Main Station">Taipei Main Station</option>
+          <option value="Shilin">Shilin</option>
+          <option value="Jiantan">Jiantan</option>
+          <option value="Beitou">Beitou</option>
+          <option value="Xiangshan">Xiangshan</option>
+        </optgroup>
+
+        <optgroup label="Blue Line (Bannan)">
+          <option value="Zhongxiao Fuxing">Zhongxiao Fuxing</option>
+          <option value="Zhongxiao Dunhua">Zhongxiao Dunhua</option>
+          <option value="Ximen">Ximen</option>
+        </optgroup>
+
+        <optgroup label="Green Line (Songshan–Xindian)">
+          <option value="Guting">Guting</option>
+          <option value="Songjiang Nanjing">Songjiang Nanjing</option>
+          <option value="Gongguan">Gongguan</option>
+        </optgroup>
+
+        <optgroup label="Brown Line (Wenhu)">
+          <option value="Daan">Daan</option>
+          <option value="Technology Building">Technology Building</option>
+          <option value="Liuzhangli">Liuzhangli</option>
+        </optgroup>
+
+        <optgroup label="Yellow Line (Circular)">
+          <option value="Dapinglin">Dapinglin</option>
+          <option value="Yonghe Yongping Elementary">Yonghe Yongping Elementary</option>
+        </optgroup>
+      </select>
+
+      <button type="submit">Confirm</button>
+    </form>
+  </div>
+
+
+
+  <div class="container" id="cafe-list">
+    <!-- JavaScript will inject the café cards here -->
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal">
+      <span class="close-btn" id="modal-close">&times;</span>
+      <h2 id="modal-title"></h2>
+      <div class="info" id="modal-info"></div>
+      <p id="modal-description"></p>
+      <div class="section-title">🥤 Drinks</div>
+      <img id="modal-drink-img" src="" alt="Drink" />
+      <div class="section-title">🍰 Desserts</div>
+      <img id="modal-dessert-img" src="" alt="Dessert" />
+      <div class="section-title">📝 Review</div>
+      <p id="modal-review"></p>
+      <a class="map-link" id="modal-map-link" href="#" target="_blank">View on Google Maps</a>
+    </div>
+  </div>
+
+  <script>
+    const cafes = [
+      {
+        name: "Homey's Café",
+        district: "Da’an District",
+        rating: 4.6,
+        img: "Pictures/1.1Homey's cafe.jpg",
+        alt: "Homey's Café",
+        link: "https://maps.app.goo.gl/WZkeBZNwc5Vs3rQq6",
+        position: "center 20%",
+        description: "Minimalist interior and excellent hand-drip coffee. Great spot for quiet reading or remote work.",
+        drink: "Pictures/drink1.jpg",
+        dessert: "Pictures/dessert1.jpg",
+        review: "Their Ethiopia Yirgacheffe pour-over is bright and floral. The barista is super friendly and explains the beans well."
+      },
+      {
+        name: "DarkConer café",
+        district: "Zhongshan District",
+        rating: 4.8,
+        img: "Pictures/2.1DarkConer cafe.jpg",
+        alt: "DarkConer café",
+        link: "https://maps.app.goo.gl/TroeLeYuHzRn4bsY8",
+        position: "center 40%",
+        description: "Tucked in a quiet alley, this café offers a peaceful environment and delicious pastries.",
+        drink: "Pictures/drink2.jpg",
+        dessert: "Pictures/dessert2.jpg",
+        review: "The signature black sesame latte is rich and comforting. Try their matcha cake—it’s not too sweet and pairs well with tea."
+      },
+      {
+        name: "Paper St. Coffee Company",
+        district: "Songshan District",
+        rating: 4.4,
+        img: "Pictures/3.1.1PaperStreet.jpg",
+        alt: "Paper St. Coffee Company",
+        link: "https://maps.app.goo.gl/cme5Gvp5Dk9BLknZA",
+        position: "center 65%",
+        description: "Surrounded by plants and natural light, this café feels like an urban oasis. Specialty in cold brews.",
+        drink: "Pictures/drink3.jpg",
+        dessert: "Pictures/dessert3.jpg",
+        review: "Cold brew lovers will love their citrus-infused version. Banana cake is moist and made in-house."
+      },
+      {
+        name: "Cafe Macho",
+        district: "Songshan District",
+        rating: 4.4,
+        img: "Pictures/4.1Cafe Macho.jpg",
+        alt: "Cafe Macho",
+        link: "https://maps.app.goo.gl/cme5Gvp5Dk9BLknZA",
+        position: "center 65%",
+        description: "Loft-style interior with jazz music and comfy couches. Spacious for group meetups.",
+        drink: "Pictures/drink4.jpg",
+        dessert: "Pictures/dessert4.jpg",
+        review: "Loved their espresso tonic—balanced and refreshing. The tiramisu is classic and creamy."
+      },
+      {
+        name: "GO-JI-BY café",
+        district: "Songshan District",
+        rating: 4.4,
+        img: "Pictures/5.1二會咖啡廳.jpg",
+        alt: "gojiby café",
+        link: "https://maps.app.goo.gl/cme5Gvp5Dk9BLknZA",
+        position: "center 10%",
+        description: "Retro furniture and calming music make this a good weekend hideaway.",
+        drink: "Pictures/drink5.jpg",
+        dessert: "Pictures/dessert5.jpg",
+        review: "The goji berry tea is their signature—naturally sweet. Pair it with the almond tart for a great combo."
+      }
+    ];
+
+    const container = document.getElementById("cafe-list");
+    const modalOverlay = document.getElementById("modal-overlay");
+    const modal = document.getElementById("modal");
+    const modalClose = document.getElementById("modal-close");
+
+    const modalTitle = document.getElementById("modal-title");
+    const modalInfo = document.getElementById("modal-info");
+    const modalDesc = document.getElementById("modal-description");
+    const modalDrink = document.getElementById("modal-drink-img");
+    const modalDessert = document.getElementById("modal-dessert-img");
+    const modalReview = document.getElementById("modal-review");
+    const modalLink = document.getElementById("modal-map-link");
+
+    cafes.forEach((cafe, index) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="img-wrapper" style="--position: ${cafe.position};">
+          <img src="${cafe.img}" alt="${cafe.alt}">
+        </div>
+        <div class="card-content">
+          <h2>${cafe.name}</h2>
+          <div class="info">📍 ${cafe.district} / ⭐ ${cafe.rating}</div>
+          <p class="description">${cafe.description}</p>
+          <a class="map-link" href="${cafe.link}" target="_blank">View on Google Maps</a>
+        </div>
+      `;
+
+      card.addEventListener("click", () => {
+        modalTitle.textContent = cafe.name;
+        modalInfo.textContent = `📍 ${cafe.district} / ⭐ ${cafe.rating}`;
+        modalDesc.textContent = cafe.description;
+        modalDrink.src = cafe.drink;
+        modalDessert.src = cafe.dessert;
+        modalReview.textContent = cafe.review;
+        modalLink.href = cafe.link;
+        modalOverlay.style.display = "flex";
+      });
+
+      container.appendChild(card);
+    });
+
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay || e.target === modalClose) {
+        modalOverlay.style.display = "none";
+      }
+    });
+  </script>
+
+  <script>
+    document.querySelector(".nav-toggle").addEventListener("click", () => {
+      document.querySelector(".nav-list").classList.toggle("show");
+    });
+  </script>
+</body>
+</html>
